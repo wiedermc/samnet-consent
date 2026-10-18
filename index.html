@@ -862,62 +862,322 @@ body {
       var m = 20, pw = 170, y = 15;
 
       function txt(t, sz, b, ind) {
-        doc.setFontSize(sz || 10);
+        doc.setFontSize(sz || 9);
         doc.setFont('helvetica', b ? 'bold' : 'normal');
         var lines = doc.splitTextToSize(t, pw - (ind || 0));
-        if (y + lines.length * (sz || 10) * 0.4 > 275) { doc.addPage(); y = 15; }
-        doc.text(lines, m + (ind || 0), y);
-        y += lines.length * (sz || 10) * 0.45 + 1;
+        var lineH = (sz || 9) * 0.4;
+        for (var li = 0; li < lines.length; li++) {
+          if (y > 275) { addFooter(); doc.addPage(); y = 15; }
+          doc.text(lines[li], m + (ind || 0), y);
+          y += lineH;
+        }
+        y += 1;
+      }
+      function bullet(t, sz) {
+        doc.setFontSize(sz || 9);
+        doc.setFont('helvetica', 'normal');
+        var lines = doc.splitTextToSize(t, pw - 8);
+        var lineH = (sz || 9) * 0.4;
+        for (var li = 0; li < lines.length; li++) {
+          if (y > 275) { addFooter(); doc.addPage(); y = 15; }
+          if (li === 0) doc.text('•', m + 2, y);
+          doc.text(lines[li], m + 8, y);
+          y += lineH;
+        }
+        y += 0.5;
       }
       function gap(n) { y += (n || 3); }
+      function addFooter() {
+        doc.setFontSize(7);
+        doc.setTextColor(128, 128, 128);
+        doc.text('SAMNet Einwilligung | Version 3 | Ethikvotum/Parere Nr. 32-2026', m, 287);
+        doc.setTextColor(0, 0, 0);
+      }
 
+      /* ---- TITELSEITE / PAGINA TITOLO ---- */
       doc.setTextColor(26, 82, 118);
       txt('SAMNet - Einwilligungserklaerung / Dichiarazione di consenso', 14, true);
-      y += 4;
+      y += 2;
       doc.setTextColor(0, 0, 0);
 
       txt('Studientitel / Titolo dello studio:', 10, true);
       txt('SAMNet - Suedtiroler AllgemeinMedizin Netzwerk', 10);
       txt('SAMNet - Rete della Ricerca in Medicina Generale in Alto Adige', 10);
-      gap();
+      gap(4);
 
-      txt('EINWILLIGUNG ZUR STUDIE / CONSENSO ALLO STUDIO', 11, true);
-      gap();
-      txt('Ich erklaere, die oben genannten Informationen gelesen und verstanden zu haben und Gelegenheit gehabt zu haben, Fragen zu stellen. Ich willige in die pseudonymisierte Verarbeitung meiner routinemaessig erhobenen klinischen Daten zu Forschungszwecken ein, in eine moegliche pseudonymisierte Weitergabe an Projektpartner sowie in die Veroeffentlichung der Ergebnisse ausschliesslich in anonymisierter Form. Mir ist bekannt, dass ich meine Einwilligung jederzeit widerrufen kann.', 9);
-      gap();
-      txt('Dichiaro di aver letto e compreso le informazioni sopra riportate e di aver avuto la possibilita di fare domande. Acconsento al trattamento, in forma pseudonimizzata, dei dati clinici di routine per scopi di ricerca, all\'eventuale condivisione pseudonimizzata con i partner del progetto e alla pubblicazione dei risultati solo in forma anonima. Sono consapevole di poter revocare il consenso in qualsiasi momento.', 9);
-      gap();
-
-      txt('DATENSCHUTZEINWILLIGUNG / CONSENSO PRIVACY', 11, true);
-      gap();
-      txt('Ich erklaere, die Informationen verstanden zu haben, und willige in die Verarbeitung meiner personenbezogenen Daten im Rahmen des Projekts SAMNet ein.', 9);
-      gap();
-      txt('Dichiaro di aver compreso le informazioni ricevute e acconsento al trattamento dei miei dati personali, secondo le modalita sopra descritte, nell\'ambito del progetto SAMNet.', 9);
-      gap(6);
-
+      /* Patientendaten oben */
       txt('PATIENTENDATEN / DATI DEL PAZIENTE', 11, true);
       gap();
       txt('Name / Nome: ' + data.name, 10);
       txt('Geburtsdatum / Data di nascita: ' + data.dob, 10);
       txt('Steuernummer / Codice Fiscale: ' + data.cf, 10);
       txt('Bestaetigungscode / Codice: ' + code, 10);
-      gap(6);
-
-      txt('BESTAETIGUNG / CONFERMA', 11, true);
-      gap();
-      txt('Der/die Patient/in hat die vollstaendigen Einwilligungstexte (Studieneinwilligung und Datenschutzeinwilligung) online gelesen, seinen/ihren Namen als Bestaetigung eingegeben und die Einwilligung muendlich gegenueber dem behandelnden Arzt erklaert.', 9);
-      gap();
-      txt('Il/la paziente ha letto i testi completi di consenso (consenso allo studio e consenso privacy) online, ha inserito il proprio nome come conferma e ha dichiarato verbalmente il consenso al medico curante.', 9);
-      gap(6);
+      gap(4);
 
       txt('Vorab-Einwilligung online am / Pre-consenso online il: ' + new Date(data.timestamp).toLocaleString('de-AT'), 10);
       txt('Aerztliche Bestaetigung am / Conferma medica il: ' + new Date(data.confirmedAt).toLocaleString('de-AT'), 10);
       txt('Arzt / Medico: ' + data.doctor, 10);
       gap(6);
 
-      doc.setFontSize(7);
-      doc.setTextColor(128, 128, 128);
-      doc.text('Version 3 | Ethikvotum/Parere Nr. 32-2026 (22.04.2026)', m, 280);
+      /* ============================================================
+         TEIL 1 – STUDIENINFORMATION (DEUTSCH)
+         ============================================================ */
+      doc.setTextColor(26, 82, 118);
+      txt('TEIL 1: EINWILLIGUNG ZUR TEILNAHME AN DER STUDIE', 12, true);
+      doc.setTextColor(0, 0, 0);
+      gap(2);
+      txt('DEUTSCH', 10, true);
+      gap(2);
+      txt('Studientitel: SAMNet – Suedtiroler AllgemeinMedizin Netzwerk', 9, true);
+      gap();
+      txt('Promotor: Institut fuer Allgemeinmedizin und Public Health, Claudiana (Bozen) – in Zusammenarbeit mit den Praxen fuer Allgemeinmedizin des SAMNet.', 9);
+      gap();
+      txt('Sehr geehrte Patientin, sehr geehrter Patient,', 9);
+      txt('Ihr Hausarzt nimmt am Projekt SAMNet teil, das die Qualitaet der medizinischen Versorgung verbessern soll.', 9);
+      gap();
+      txt('Was bedeutet das fuer Sie?', 9, true);
+      bullet('Ihre Behandlung aendert sich nicht');
+      bullet('Ihr Arzt arbeitet weiterhin nach den geltenden Leitlinien');
+      bullet('Es sind keine zusaetzlichen Massnahmen erforderlich');
+      gap();
+      txt('Worum handelt es sich?', 9, true);
+      txt('Primaeres Ziel ist die systematische Verbesserung der Qualitaet der Dokumentation und der Betreuung bei chronischen Erkrankungen in der Suedtiroler Allgemeinmedizin. Dies soll durch die Einfuehrung messbarer Prozessindikatoren mit definierten Zielwerten erreicht werden. (Beispiele: konsequente Erfassung der Therapie, der verordneten Untersuchungen, der Lebensgewohnheiten, Dokumentation von Gewicht und Groesse, koerperlicher Aktivitaet, Blutdruck usw.)', 9);
+      gap();
+      txt('Fuer die Patientinnen und Patienten bedeutet dies, dass ihre Hausaerztin bzw. ihr Hausarzt mehr Informationen sammelt, um die Diagnose und Therapie sowie die klinische, therapeutische und alltagsbezogene Betreuung zu verbessern und sicherzustellen.', 9);
+      gap();
+      txt('Sekundaere Ziele:', 9, true);
+      bullet('Aufbau einer epidemiologischen Datenbasis der Primaerversorgung in Suedtirol');
+      bullet('Moeglichkeit des Benchmarkings zwischen den teilnehmenden Praxen sowie im Vergleich mit nationalen und internationalen Referenzwerten');
+      bullet('Aufbau einer Forschungsinfrastruktur fuer praxisorientierte Studien in der Allgemeinmedizin');
+      bullet('Staerkung der evidenzbasierten Versorgung und Vorbereitung auf zukuenftige Governance-Strukturen im Suedtiroler Gesundheitssystem');
+      gap();
+      txt('Risiken und Nutzen', 9, true);
+      txt('Die Teilnahme ist mit keinen zusaetzlichen medizinischen Risiken verbunden. Es besteht kein unmittelbarer persoenlicher Nutzen; die Ergebnisse koennen jedoch kuenftig gerechtere klinische Bewertungen und gezieltere therapeutische Entscheidungen ermoeglichen.', 9);
+      gap();
+      txt('Freiwilligkeit und Widerruf', 9, true);
+      txt('Die Teilnahme ist freiwillig. Sie koennen Ihre Einwilligung jederzeit ohne Angabe von Gruenden widerrufen, ohne dass Ihnen daraus Nachteile fuer Ihre medizinische Versorgung entstehen. Bis zur vollstaendigen Anonymisierung werden Ihre Daten auf Antrag geloescht; bereits anonymisierte Daten sind nicht mehr einer Person zuordenbar.', 9);
+      gap();
+      txt('Datenschutz (DSGVO)', 9, true);
+      txt('Verantwortlicher fuer die Datenverarbeitung: Claudiana – Institut fuer Allgemeinmedizin und Public Health, Lorenz-Boehler-Strasse 13, 39100 Bozen.', 9);
+      txt('Rechtsgrundlage: Ihre Einwilligung (Art. 6 Abs. 1 lit. a und Art. 9 Abs. 2 lit. a DSGVO).', 9);
+      gap();
+      txt('Das Datenschutzkonzept von GPG entspricht der DSGVO und umfasst folgende Massnahmen:', 9);
+      bullet('Pseudonymisierung: Jeder Patientin/jedem Patienten wird eine eindeutige ID zugewiesen, die bei jeder Analyse mittels eines verschluesselten Algorithmus neu berechnet wird. Identifizierende Daten werden durch diese ID ersetzt.');
+      bullet('Zuordnungskontrolle: Die Zuordnung zwischen Patienten-ID und Identitaetsdaten ist ausschliesslich der behandelnden Aerztin/dem behandelnden Arzt auf den eigenen IT-Systemen moeglich.');
+      bullet('Verschluesselung: Die Uebertragung saemtlicher Daten erfolgt ueber gesicherte SSL-/TLS-Verbindungen.');
+      bullet('Aggregation: Dem Institut fuer Allgemeinmedizin werden ausschliesslich aggregierte und anonymisierte Datensaetze zur Verfuegung gestellt. Einzelne Patientendaten sind fuer das Institut nicht zugaenglich.');
+      bullet('Freiwilligkeit: Die Aktivierung des Cloud-Dienstes und die Teilnahme am GPG-Netzwerk erfolgen auf freiwilliger Basis und sind jederzeit widerrufbar.');
+      gap();
+      txt('Aufbewahrung: Bis zu 10 Jahre nach Abschluss der Studie; anschliessend Loeschung der elektronischen Daten und sichere Vernichtung der Originale in Papierform.', 9);
+      txt('Ihre Rechte: Auskunft, Berichtigung, Loeschung (im angegebenen Rahmen), Einschraenkung der Verarbeitung, Datenuebertragbarkeit sowie Beschwerde bei der Datenschutzbehoerde.', 9);
+
+      /* ============================================================
+         TEIL 1 – STUDIENINFORMATION (ITALIANO)
+         ============================================================ */
+      gap(6);
+      txt('ITALIANO', 10, true);
+      gap(2);
+      txt('Titolo dello studio: SAMNet – Rete della Ricerca in Medicina Generale in Alto Adige', 9, true);
+      gap();
+      txt('Promotore: Istituto di Medicina Generale e Public Health, Claudiana (Bolzano) – in collaborazione con gli studi di Medicina Generale della rete SAMNet.', 9);
+      gap();
+      txt('Gentile Paziente,', 9);
+      txt('il Suo medico di famiglia partecipa al progetto SAMNet, che ha l\'obiettivo di migliorare la qualita dell\'assistenza sanitaria.', 9);
+      gap();
+      txt('Cosa significa per Lei?', 9, true);
+      bullet('Le cure che riceve non cambiano');
+      bullet('Il medico continua a seguire le linee guida standard');
+      bullet('Non e richiesto alcun intervento aggiuntivo');
+      gap();
+      txt('Di cosa si tratta?', 9, true);
+      txt('Obiettivo primario: Miglioramento sistematico della qualita della documentazione e dell\'assistenza nelle malattie croniche nella Medicina Generale altoatesina, attraverso l\'introduzione di indicatori di processo misurabili con valori target definiti. (per esempio registrare sempre la terapia, gli esami prescritti, monitorare le abitudini di vita quotidiana, riportare peso e altezza, esercizio fisico, pressione arteriosa…)', 9);
+      txt('Per il paziente significa che il proprio medico raccoglie maggiori informazioni, al fine di migliorare ed assicurare maggiore assistenza nella diagnosi e nella terapia e maggiore controllo clinico, terapeutico e delle comuni attivita della vita quotidiana.', 9);
+      gap();
+      txt('Obiettivi secondari:', 9, true);
+      bullet('Creazione di una base dati epidemiologica dell\'assistenza primaria in Alto Adige');
+      bullet('Possibilita di benchmarking tra gli studi partecipanti nonche rispetto a valori di riferimento nazionali e internazionali');
+      bullet('Creazione di un\'infrastruttura di ricerca per studi orientati alla pratica nella medicina generale');
+      bullet('Rafforzamento dell\'assistenza basata sull\'evidenza e preparazione per future strutture di governance nel sistema sanitario altoatesino');
+      gap();
+      txt('Rischi e benefici', 9, true);
+      txt('La partecipazione non comporta rischi medici aggiuntivi. Non vi e un beneficio personale immediato, ma i risultati potranno favorire in futuro valutazioni cliniche piu eque e decisioni terapeutiche piu mirate.', 9);
+      gap();
+      txt('Volontarieta e revoca', 9, true);
+      txt('La partecipazione e volontaria. Puo revocare il consenso in qualsiasi momento senza dover fornire motivazioni e senza alcuna conseguenza sulla sua assistenza. Fino alla completa anonimizzazione, i suoi dati verranno cancellati su richiesta; i dati gia anonimizzati non sono piu riconducibili alla persona.', 9);
+      gap();
+      txt('Protezione dei dati (GDPR)', 9, true);
+      txt('Titolare del trattamento: Claudiana – Istituto di Medicina Generale e Sanita Pubblica, Via Lorenz-Boehler 13, 39100 Bolzano.', 9);
+      txt('Base giuridica: il suo consenso (art. 6, par. 1, lett. a e art. 9, par. 2, lett. a GDPR).', 9);
+      gap();
+      txt('Il concetto di protezione dei dati di GPG e conforme al GDPR e comprende le seguenti misure:', 9);
+      bullet('Pseudonimizzazione: A ogni paziente viene assegnato un ID univoco, ricalcolato a ogni analisi con un algoritmo crittografato. I dati identificativi vengono sostituiti da questo ID.');
+      bullet('Controllo dell\'assegnazione: Il collegamento tra ID del paziente e dati identificativi e possibile esclusivamente per il medico curante sui propri sistemi informatici.');
+      bullet('Crittografia: La trasmissione di tutti i dati avviene tramite connessioni protette SSL/TLS.');
+      bullet('Aggregazione: All\'Istituto di Medicina Generale vengono forniti esclusivamente dataset aggregati e anonimizzati. I dati individuali dei pazienti non sono accessibili all\'Istituto.');
+      bullet('Volontarieta: L\'attivazione del servizio cloud e la partecipazione al GPG Network avvengono su base volontaria e sono revocabili in qualsiasi momento.');
+      gap();
+      txt('Conservazione: fino a 10 anni dopo la conclusione dello studio, quindi cancellazione dei dati elettronici e distruzione sicura degli originali cartacei.', 9);
+      txt('Diritti: accesso, rettifica, cancellazione (nei limiti indicati), limitazione, portabilita dei dati e reclamo all\'Autorita Garante per la protezione dei dati personali.', 9);
+
+      /* ============================================================
+         TEIL 2 – DATENSCHUTZEINWILLIGUNG (DEUTSCH)
+         ============================================================ */
+      gap(8);
+      doc.setTextColor(26, 82, 118);
+      txt('TEIL 2: DATENSCHUTZEINWILLIGUNG / CONSENSO PRIVACY', 12, true);
+      doc.setTextColor(0, 0, 0);
+      gap(2);
+      txt('DEUTSCH', 10, true);
+      gap(2);
+      txt('im Rahmen des Projekts SAMNet – Suedtiroler AllgemeinMedizin Netzwerk', 9);
+      gap();
+      txt('1. Rechtsgrundlagen der Verarbeitung', 9, true);
+      txt('Die Datenverarbeitung erfolgt gemaess:', 9);
+      bullet('EU-Verordnung 2016/679 – DSGVO, Art. 6, 9 und 89 (Verarbeitung von Gesundheitsdaten zu Forschungs- und Qualitaetszwecken).');
+      bullet('Italienischem Datenschutzkodex (D.lgs. 196/2003) in der Fassung des D.lgs. 101/2018.');
+      bullet('Leitlinien der italienischen Datenschutzbehoerde (Garante Privacy) zu Gesundheitsdaten und medizinischer Forschung.');
+      bullet('Landesgesetz Nr. 7/2014 ueber das Suedtiroler Gesundheitssystem.');
+      bullet('Aerztlicher Standesordnung, Art. 10–12 (Schutz der Vertraulichkeit und Patientenakte).');
+      gap();
+      txt('Die Verarbeitung stuetzt sich auf die ausdrueckliche Einwilligung der betroffenen Person (Art. 9.2.a DSGVO) sowie auf das oeffentliche Interesse im Gesundheitswesen (Art. 9.2.h DSGVO).', 9);
+      gap();
+      txt('2. Zweck der Datenverarbeitung', 9, true);
+      txt('Die Daten werden ausschliesslich verwendet fuer:', 9);
+      bullet('die Verbesserung der Dokumentationsqualitaet und der Betreuung chronischer Erkrankungen,');
+      bullet('die Berechnung von Prozess- und Qualitaetsindikatoren,');
+      bullet('aggregierte und anonymisierte Auswertungen fuer nicht-interventionelle Forschung,');
+      bullet('Benchmarking zwischen teilnehmenden Praxen.');
+      txt('Es erfolgen keine zusaetzlichen medizinischen Massnahmen.', 9);
+      gap();
+      txt('3. Art der verarbeiteten Daten', 9, true);
+      txt('Es werden ausschliesslich bereits in der elektronischen Patientenakte vorhandene Daten verarbeitet:', 9);
+      bullet('chronische Diagnosen,');
+      bullet('Therapien,');
+      bullet('verordnete und durchgefuehrte Untersuchungen,');
+      bullet('dokumentierte klinische Parameter.');
+      txt('Keine Erhebung neuer Identifikationsdaten.', 9);
+      gap();
+      txt('4. Verarbeitungsmodalitaeten und Pseudonymisierung', 9, true);
+      txt('Die Verarbeitung erfolgt ueber GPG (Genomedics Srl) gemaess DSGVO:', 9);
+      bullet('Pseudonymisierung (Art. 4 und 32 DSGVO): kryptografisch erzeugte ID.');
+      bullet('Datenminimierung (Art. 5 DSGVO).');
+      bullet('Sichere Uebertragung ueber SSL/TLS.');
+      bullet('Aggregation und Anonymisierung der an das Institut uebermittelten Daten (Art. 89 DSGVO).');
+      bullet('Zugriff auf Einzeldaten nur durch den behandelnden Arzt.');
+      gap();
+      txt('5. Freiwilligkeit', 9, true);
+      txt('Die Teilnahme ist freiwillig und kann jederzeit ohne Auswirkungen auf die medizinische Versorgung widerrufen werden.', 9);
+      gap();
+      txt('6. Rechte der betroffenen Person', 9, true);
+      txt('Gemaess DSGVO:', 9);
+      bullet('Auskunft (Art. 15),');
+      bullet('Berichtigung (Art. 16),');
+      bullet('Einschraenkung (Art. 18),');
+      bullet('Widerspruch (Art. 21),');
+      bullet('Widerruf der Einwilligung (Art. 7).');
+
+      /* ============================================================
+         TEIL 2 – DATENSCHUTZEINWILLIGUNG (ITALIANO)
+         ============================================================ */
+      gap(6);
+      txt('ITALIANO', 10, true);
+      gap(2);
+      txt('nell\'ambito del progetto SAMNet – Rete della Ricerca in Medicina Generale in Alto Adige', 9);
+      gap();
+      txt('1. Base giuridica del trattamento', 9, true);
+      txt('Il trattamento dei dati personali avviene nel rispetto della normativa vigente, in particolare:', 9);
+      bullet('Regolamento (UE) 2016/679 – GDPR, artt. 6, 9 e 89 (trattamento di dati sanitari per finalita di ricerca scientifica e miglioramento della qualita dell\'assistenza).');
+      bullet('D.lgs. 196/2003 (Codice Privacy) come modificato dal D.lgs. 101/2018.');
+      bullet('Linee guida del Garante per la Protezione dei Dati Personali in materia di dati sanitari e ricerca medica.');
+      bullet('Legge Provinciale 7/2014 sul sistema sanitario dell\'Alto Adige (organizzazione dell\'assistenza primaria).');
+      bullet('Codice di Deontologia Medica, artt. 10, 11, 12 (tutela della riservatezza e gestione della cartella clinica).');
+      gap();
+      txt('Il trattamento si basa sul consenso esplicito dell\'interessato (art. 9.2.a GDPR) e sull\'interesse pubblico nel settore sanitario (art. 9.2.h GDPR).', 9);
+      gap();
+      txt('2. Finalita del trattamento', 9, true);
+      txt('I dati vengono trattati esclusivamente per:', 9);
+      bullet('migliorare la qualita della documentazione clinica e dell\'assistenza nelle malattie croniche;');
+      bullet('calcolare indicatori di processo e di qualita dell\'assistenza;');
+      bullet('effettuare analisi aggregate e anonimizzate per finalita di ricerca non interventistica;');
+      bullet('benchmarking tra studi medici partecipanti.');
+      txt('Non vengono effettuati interventi clinici aggiuntivi ne modifiche alla terapia.', 9);
+      gap();
+      txt('3. Tipologia di dati trattati', 9, true);
+      txt('Vengono utilizzati solo dati gia presenti nella cartella clinica elettronica, relativi a:', 9);
+      bullet('diagnosi croniche,');
+      bullet('terapie,');
+      bullet('esami prescritti ed effettuati,');
+      bullet('parametri clinici documentati.');
+      txt('Non vengono raccolti nuovi dati identificativi.', 9);
+      gap();
+      txt('4. Modalita di trattamento e pseudonimizzazione', 9, true);
+      txt('Il software GPG (Genomedics Srl) elabora i dati secondo i principi del GDPR:', 9);
+      bullet('Pseudonimizzazione (art. 4 e 32 GDPR): ID crittografico ricalcolato a ogni analisi.');
+      bullet('Minimizzazione dei dati (art. 5 GDPR): solo dati necessari agli indicatori.');
+      bullet('Trasmissione sicura tramite SSL/TLS.');
+      bullet('Aggregazione e anonimizzazione dei dati inviati all\'Istituto di Medicina Generale (art. 89 GDPR).');
+      bullet('Accesso ai dati individuali esclusivamente da parte del medico curante.');
+      gap();
+      txt('5. Volontarieta della partecipazione', 9, true);
+      txt('La partecipazione e volontaria e puo essere revocata in qualsiasi momento senza alcuna conseguenza sull\'assistenza sanitaria.', 9);
+      gap();
+      txt('6. Diritti dell\'interessato', 9, true);
+      txt('Ai sensi del GDPR, il/la paziente puo esercitare i seguenti diritti:', 9);
+      bullet('accesso (art. 15),');
+      bullet('rettifica (art. 16),');
+      bullet('limitazione (art. 18),');
+      bullet('opposizione (art. 21),');
+      bullet('revoca del consenso (art. 7).');
+
+      /* ============================================================
+         TEIL 3 – EINWILLIGUNGSERKLAERUNGEN
+         ============================================================ */
+      gap(8);
+      doc.setTextColor(26, 82, 118);
+      txt('TEIL 3: EINWILLIGUNGSERKLAERUNGEN / DICHIARAZIONI DI CONSENSO', 12, true);
+      doc.setTextColor(0, 0, 0);
+      gap(2);
+
+      txt('A) Einwilligung zur Studie / Consenso allo studio', 10, true);
+      gap();
+      txt('Ich erklaere, die oben genannten Informationen gelesen und verstanden zu haben und Gelegenheit gehabt zu haben, Fragen zu stellen. Ich willige in die pseudonymisierte Verarbeitung meiner routinemaessig erhobenen klinischen Daten zu Forschungszwecken ein, in eine moegliche pseudonymisierte Weitergabe an Projektpartner sowie in die Veroeffentlichung der Ergebnisse ausschliesslich in anonymisierter Form. Mir ist bekannt, dass ich meine Einwilligung jederzeit widerrufen kann.', 9);
+      gap();
+      txt('Dichiaro di aver letto e compreso le informazioni sopra riportate e di aver avuto la possibilita di fare domande. Acconsento al trattamento, in forma pseudonimizzata, dei dati clinici di routine per scopi di ricerca, all\'eventuale condivisione pseudonimizzata con i partner del progetto e alla pubblicazione dei risultati solo in forma anonima. Sono consapevole di poter revocare il consenso in qualsiasi momento.', 9);
+      gap(4);
+
+      txt('B) Datenschutzeinwilligung / Consenso privacy', 10, true);
+      gap();
+      txt('Ich erklaere, die Informationen verstanden zu haben, und willige in die Verarbeitung meiner personenbezogenen Daten im Rahmen des Projekts SAMNet ein.', 9);
+      gap();
+      txt('Dichiaro di aver compreso le informazioni ricevute e acconsento al trattamento dei miei dati personali, secondo le modalita sopra descritte, nell\'ambito del progetto SAMNet.', 9);
+      gap(6);
+
+      /* ============================================================
+         BESTAETIGUNG / CONFERMA
+         ============================================================ */
+      doc.setTextColor(26, 82, 118);
+      txt('BESTAETIGUNG / CONFERMA', 11, true);
+      doc.setTextColor(0, 0, 0);
+      gap();
+      txt('Der/die Patient/in hat die vollstaendigen Einwilligungstexte (Studieneinwilligung und Datenschutzeinwilligung) online gelesen, seinen/ihren Namen als Bestaetigung eingegeben und die Einwilligung muendlich gegenueber dem behandelnden Arzt erklaert.', 9);
+      gap();
+      txt('Il/la paziente ha letto i testi completi di consenso (consenso allo studio e consenso privacy) online, ha inserito il proprio nome come conferma e ha dichiarato verbalmente il consenso al medico curante.', 9);
+      gap(4);
+
+      txt('Patient/in / Paziente: ' + data.name, 10, true);
+      txt('Steuernummer / Codice Fiscale: ' + data.cf, 10);
+      txt('Bestaetigungscode / Codice: ' + code, 10);
+      gap();
+      txt('Vorab-Einwilligung online am / Pre-consenso online il: ' + new Date(data.timestamp).toLocaleString('de-AT'), 10);
+      txt('Aerztliche Bestaetigung am / Conferma medica il: ' + new Date(data.confirmedAt).toLocaleString('de-AT'), 10);
+      txt('Arzt / Medico: ' + data.doctor, 10);
+      gap(4);
+
+      txt('Dieses Dokument wurde automatisch erstellt und bedarf keiner handschriftlichen Unterschrift.', 8);
+      txt('Questo documento e stato generato automaticamente e non necessita di firma autografa.', 8);
+
+      /* Footer auf letzter Seite */
+      addFooter();
 
       currentPdfBlob = doc.output('blob');
       currentPdfBlob.filename = 'SAMNet_Einwilligung_' + data.cf + '_' + new Date().toISOString().slice(0, 10) + '.pdf';
